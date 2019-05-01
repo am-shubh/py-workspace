@@ -1,5 +1,5 @@
 from flask_restful import Resource
-from flask_jwt import jwt_required
+from flask_jwt_extended import jwt_required, jwt_optional, get_jwt_identity
 
 from models.store import StoreModel
 
@@ -13,7 +13,7 @@ class Store(Resource):
 
 		return {'message': 'Store not found'}, 404
 
-	@jwt_required()
+	@jwt_required
 	def post(self, name):
 		
 		if StoreModel.find_by_name(name):
@@ -27,7 +27,7 @@ class Store(Resource):
 
 		return store.json(), 201
 
-	@jwt_required()
+	@jwt_required
 	def delete(self,name):
 
 		store = StoreModel.find_by_name(name)
@@ -41,13 +41,23 @@ class Store(Resource):
 
 class StoreList(Resource):
 
+	@jwt_optional
 	def get(self):
+
+		user_id = get_jwt_identity()
 
 		stores = [store.json() for store in StoreModel.query.all()]
 
-		responseData = {
-			'count': len(stores),
-			'stores': stores
-		}
+		if user_id:
 
-		return responseData
+			responseData = {
+				'count': len(stores),
+				'stores': stores
+			}
+
+			return responseData
+
+		return {
+			'stores': [store['name'] for store in stores],
+			'message': 'More data available if you log in'
+		}, 200
