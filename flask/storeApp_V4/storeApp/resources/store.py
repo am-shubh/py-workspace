@@ -1,11 +1,12 @@
 from flask_restful import Resource
-from flask_jwt_extended import jwt_required, jwt_optional, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from models.store import StoreModel
 
 class Store(Resource):
 
-	def get(self, name):
+	@classmethod
+	def get(cls, name):
 		store = StoreModel.find_by_name(name)
 
 		if store:
@@ -13,8 +14,9 @@ class Store(Resource):
 
 		return {'message': 'Store not found'}, 404
 
+	@classmethod
 	@jwt_required
-	def post(self, name):
+	def post(cls, name):
 		
 		if StoreModel.find_by_name(name):
 			return {'message': "A store with name '{}' already exists.".format(name)}, 400
@@ -27,8 +29,9 @@ class Store(Resource):
 
 		return store.json(), 201
 
+	@classmethod
 	@jwt_required
-	def delete(self,name):
+	def delete(cls,name):
 
 		store = StoreModel.find_by_name(name)
 
@@ -41,23 +44,14 @@ class Store(Resource):
 
 class StoreList(Resource):
 
-	@jwt_optional
-	def get(self):
-
-		user_id = get_jwt_identity()
+	@classmethod
+	def get(cls):
 
 		stores = [store.json() for store in StoreModel.query.all()]
 
-		if user_id:
+		responseData = {
+			'count': len(stores),
+			'stores': stores
+		}
 
-			responseData = {
-				'count': len(stores),
-				'stores': stores
-			}
-
-			return responseData
-
-		return {
-			'stores': [store['name'] for store in stores],
-			'message': 'More data available if you log in'
-		}, 200
+		return responseData

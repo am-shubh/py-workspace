@@ -11,8 +11,8 @@ class Item(Resource):
 	parser.add_argument('price', type=float, required=True, help = 'price is required')
 	parser.add_argument('store_id', type=int, required=True, help = 'store Id is required')
 
-
-	def get(self,_id):
+	@classmethod
+	def get(cls,_id):
 
 		item = ItemModel.findItem(_id = _id)
 
@@ -21,9 +21,9 @@ class Item(Resource):
 
 		return {"message": "item not found"}, 404
 
-	
+	@classmethod
 	@jwt_required
-	def post(self):
+	def post(cls):
 
 		requestData = Item.parser.parse_args()
 
@@ -41,9 +41,9 @@ class Item(Resource):
 
 		return {"message": "item created successfully.", "item": created_item.json()}, 201
 
-
+	@classmethod
 	@jwt_required
-	def delete(self, _id):
+	def delete(cls, _id):
 
 		item = ItemModel.findItem(_id = _id)
 
@@ -53,9 +53,9 @@ class Item(Resource):
 
 		return {"message": "item not found"}, 404
 
-	
+	@classmethod
 	@jwt_required
-	def put(self, _id):
+	def put(cls, _id):
 
 		requestData = Item.parser.parse_args()
 
@@ -88,7 +88,8 @@ class Item(Resource):
 
 class Items(Resource):
 
-	def get(self):
+	@classmethod
+	def get(cls):
 
 		items = [item.json() for item in ItemModel.query.all()]
 
