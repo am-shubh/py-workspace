@@ -1,3 +1,6 @@
 flask/storeApp_V2/venv
 flask/storeApp_V3/venv
 flask/storeApp_V4/venv
+flask/userApp_V1/venv
+
+flask/userApp_V1/userApp/.env
