@@ -103,3 +103,17 @@ class AvatarUpload(Resource):
 		except UploadNotAllowed:
 			extension = image_helper.get_extension(data["image"])
 			return {"message": "Extension '{}' not allowed".format(extension)}, 400
+
+
+class Avatar(Resource):
+
+	@jwt_required
+	def get(self, user_id: int):
+
+		folder = "avatars"
+		filename = f"user_{user_id}"
+		avatar = image_helper.find_image_any_format(filename, folder)
+
+		if avatar:
+			return send_file(avatar)
+		return {"message": "Avatar not found"}, 404
