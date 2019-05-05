@@ -9,8 +9,8 @@ There are people who are doing wonderful job by teaching us lots of interesting 
 
 Please visit their blogs/channels and appreciate them.
 
-- **Adrian Rosebrock**[https://www.pyimagesearch.com/] @jrosebr1
-- **Harrison Kinsley**[https://pythonprogramming.net/] a.k.a **sentdex**[https://www.youtube.com/user/sentdex/about] @Sentdex
+- **[Adrian Rosebrock](https://www.pyimagesearch.com/)** @jrosebr1
+- **[Harrison Kinsley](https://pythonprogramming.net/)** a.k.a **[sentdex](https://www.youtube.com/user/sentdex/about)** @Sentdex
 
 I would like to thanks my friends and colleagues who shared their online courses with me to learn.
 
