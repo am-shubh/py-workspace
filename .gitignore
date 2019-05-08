@@ -6,3 +6,5 @@ flask/userApp_V2/venv
 
 flask/userApp_V1/userApp/.env
 flask/userApp_V2/userApp/.env
+
+numpy/.ipynb_checkpoints
