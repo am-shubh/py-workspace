@@ -1,5 +1,6 @@
 import functools
 from collections import OrderedDict
+import json
 
 from hash_util import hash_string_sha256, hash_block
 
@@ -8,7 +9,7 @@ genesis_block = {
 	'previous_hash': '',
 	'index': 0,
 	'transactions': [],
-	'prrof': 100
+	'proof': 100
 }
 
 # 10 coins rewarded to miners 
@@ -24,6 +25,49 @@ open_transactions = []
 sender = 'Shubh'
 
 participants = {'Shubh'}
+
+
+def load_data():
+
+	try:
+		with open('blockchain.txt', mode='r') as f:
+			global blockchain, open_transactions
+
+			file_content = f.readlines()
+
+			blockchain = json.loads(file_content[0][:-1])
+			blockchain = [{
+				'previous_hash': block['previous_hash'], 
+				'index': block['index'], 
+				'proof': block['proof'], 
+				'transactions': [OrderedDict([
+					('sender', tx['sender']),
+					('recipient', tx['recipient']),
+					('amount', tx['amount'])
+				]) for tx in block['transactions']]
+			} for block in blockchain]
+
+			open_transactions = json.loads(file_content[1])
+			open_transactions = [OrderedDict([
+				('sender', tx['sender']),
+				('recipient', tx['recipient']),
+				('amount', tx['amount'])
+			]) for tx in open_transactions]
+
+	except IOError:
+		print('[ERROR] Could not load Data')
+
+
+def save_data():
+
+	try:
+		with open('blockchain.txt', mode='w') as f:
+			f.write(json.dumps(blockchain))
+			f.write('\n')
+			f.write(json.dumps(open_transactions))
+
+	except IOError:
+		print('[ERROR] Could not save Data')
 
 
 def get_balance(participant):
@@ -63,6 +107,7 @@ def add_transaction(recipient: str, sender=sender, amount = 1.0):
 		open_transactions.append(transaction)
 		participants.add(sender)
 		participants.add(recipient)
+		save_data()
 		return True
 
 	return False
@@ -71,6 +116,7 @@ def add_transaction(recipient: str, sender=sender, amount = 1.0):
 # creates blockchain with genesis block
 def create_genesis_block(genesis_block_value: list):
 	blockchain.append(genesis_block_value)
+	save_data()
 
 
 # mines block
@@ -149,18 +195,37 @@ def get_transaction():
 	return (tx_recipient, tx_amount)
 
 
-print('[INFO] initialising...')
-print('[INFO] Creating genesis block with value {}\n'.format(genesis_block))
-create_genesis_block(genesis_block)
+def initialize():
 
-print('-'*30)
-print('Please Choose')
-print('1: Add a new transaction')
-print('2: Mine a new Block')
-print('3: Get Balance')
-print('4: Output blockchain')
-print('q: Quit')
-print('-'*30)
+	try:
+		with open('blockchain.txt', mode='r') as f:
+
+			file_content = f.readlines()
+
+			if not file_content:
+				print('[INFO] Creating genesis block with value {}\n'.format(genesis_block))
+				create_genesis_block(genesis_block)
+
+			else:
+				print('[INFO] initialising...')
+				load_data()
+
+	except IOError:
+		print('[ERROR] File does not exixt')
+		print('[INFO] Creating \'blockchain.txt\'')
+		print('[INFO] Creating genesis block with value {}\n'.format(genesis_block))
+		create_genesis_block(genesis_block)
+
+	print('-'*30)
+	print('Please Choose')
+	print('1: Add a new transaction')
+	print('2: Mine a new Block')
+	print('3: Get Balance')
+	print('4: Output blockchain')
+	print('q: Quit')
+	print('-'*30)
+
+initialize()
 
 while True:
 
@@ -180,6 +245,7 @@ while True:
 	elif choice == '2':
 		if mine_block():
 			open_transactions = []
+			save_data()
 
 	elif choice == '3':
 		name = input('Enter Participant\'s Name: ')
