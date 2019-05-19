@@ -142,7 +142,7 @@ class Blockchain:
 	def mine_block(self):
 
 		if self.hosting_node == None:
-			return False
+			return None
 
 		last_block = self.__chain[-1]
 
@@ -159,7 +159,7 @@ class Blockchain:
 				print('[ERROR] transaction not verified')
 				self.__open_transactions = []
 				self.save_data()
-				return False
+				return None
 
 		copied_transactions.append(reward_transaction)
 		
@@ -168,7 +168,7 @@ class Blockchain:
 		self.__chain.append(block)
 		self.__open_transactions = []
 		self.save_data()
-		return True
+		return block
 
 
 	def proof_of_work(self):
