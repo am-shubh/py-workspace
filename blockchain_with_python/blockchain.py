@@ -1,11 +1,11 @@
 import functools
-from collections import OrderedDict
 import json
 
-from hash_util import hash_block
+from utility.hash_util import hash_block
 from block import Block
 from transaction import Transaction
-from verification import Verification
+from utility.verification import Verification
+from wallet import Wallet
 
 # 10 coins rewarded to miners 
 MINING_REWARD = 10
@@ -51,7 +51,8 @@ class Blockchain:
 				for block in blockchain:
 
 					converted_tx = [Transaction(tx['sender'], 
-											tx['recipient'], 
+											tx['recipient'],
+											tx['signature'], 
 											tx['amount']) 
 									for tx in block['transactions']]
 
@@ -69,14 +70,15 @@ class Blockchain:
 
 				updated_transactions = []
 				for tx in open_transactions:
-					updated_transaction = Transaction(tx['sender'], tx['recipient'], tx['amount'])
+					updated_transaction = Transaction(tx['sender'], tx['recipient'], tx['signature'], tx['amount'])
 
 					updated_transactions.append(updated_transaction)
 
 				self.__open_transactions = updated_transactions
 
 		except IOError:
-			print('[ERROR] Could not load Data')
+			# print('[ERROR] Could not load Data')
+			pass
 
 
 	def save_data(self):
@@ -121,9 +123,12 @@ class Blockchain:
 		return self.__chain[-1]
 
 
-	def add_transaction(self, recipient: str, sender, amount = 1.0):
+	def add_transaction(self, recipient: str, sender, signature, amount = 1.0):
 
-		transaction = Transaction(sender, recipient, amount)
+		if self.hosting_node == None:
+			return False
+
+		transaction = Transaction(sender, recipient, signature, amount)
 
 		if Verification.verify_transaction(transaction, self.get_balance):
 			self.__open_transactions.append(transaction)
@@ -136,15 +141,26 @@ class Blockchain:
 	# mines block
 	def mine_block(self):
 
+		if self.hosting_node == None:
+			return False
+
 		last_block = self.__chain[-1]
 
 		hashed_block = hash_block(last_block)
 
 		proof = self.proof_of_work()
 
-		reward_transaction = Transaction('MINING', self.hosting_node, MINING_REWARD)
+		reward_transaction = Transaction('MINING', self.hosting_node, '', MINING_REWARD)
 
 		copied_transactions = self.__open_transactions[:]
+
+		for tx in copied_transactions:
+			if not Wallet.verify_transaction(tx):
+				print('[ERROR] transaction not verified')
+				self.__open_transactions = []
+				self.save_data()
+				return False
+
 		copied_transactions.append(reward_transaction)
 		
 		block = Block(len(self.__chain), hashed_block, copied_transactions, proof)

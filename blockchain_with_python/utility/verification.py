@@ -1,4 +1,5 @@
-from hash_util import hash_string_sha256, hash_block
+from utility.hash_util import hash_string_sha256, hash_block
+from wallet import Wallet
 
 class Verification:
 	def __init__(self):
@@ -32,7 +33,7 @@ class Verification:
 	@staticmethod
 	def verify_transaction(transaction, get_balance):
 		sender_balance = get_balance()
-		return sender_balance >= transaction.amount
+		return sender_balance >= transaction.amount and Wallet.verify_transaction(transaction)
 
 
 	@staticmethod
